@@ -1,6 +1,6 @@
 # LLM Code generation research
 
-This is a short research on code and unit test generation involving LLMs with the overview of the current state of things taken on Jan, 2024. The goal is to propose a concept of the product concept for software unit testing or propose research directions.
+This is a short research on code and unit test generation involving LLMs with the overview of the current state of things taken on Jan, 2024. The goal is to propose a concept of the product for enterprise software unit testing and/or propose research directions.
 
 The setting is large industrial environment with big diverse codebase which can be used as knowledge base for AI to assist or automate unit test creation.
 
@@ -19,7 +19,7 @@ Here I want to describe what I found so far in terms of papers, articles, experi
 
 There are many different ways of software testing, I can propose taking [Atlassian manual article](https://www.atlassian.com/continuous-delivery/software-testing/types-of-software-testing) as a starting point. To name a few beside unit tests:
 
-1. Integration tests.
+1. Integration tests
 2. Functional tests
 3. End to End tests
 4. Acceptance testing
@@ -27,7 +27,7 @@ There are many different ways of software testing, I can propose taking [Atlassi
 6. Smoke testing
 7. ...
 
-**Integration test** can be described in the following way: For example, there is a job that builds a Docker image for deployment. For instance, a Python application - which pulls some libraries. After assembling the Docker image you run it and make a `curl` request. The essence of the test is to check whether the Docker was built correctly and whether the program was able to respond. For example, the image might pull a lot of components that need to work together, and the service might not respond because something didn't get pulled in.
+**Integration test** can be described in the following way: For example, there is a job that builds a Docker image for deployment. For instance, a Python application - which pulls some libraries. After assembling the Docker image you run it and make a `curl` request. The essence of the test is to check whether the Docker was built correctly and whether the program is able to respond. For example, the image might pull a lot of components that need to work together, and the service might not respond because something didn't get pulled in.
 
 **Functional test** - Say, developers send their requests to various services of the project through Postman.
 
@@ -39,20 +39,20 @@ There are many different ways of software testing, I can propose taking [Atlassi
 
 **Smoke testing** - suppose, you have a set of commands in a Docker image's bash script that, before running the code, checks the availability of ports of the systems with which it will interact. Within the application's logic, there might be such a test that performs an initial check of the system's operability.
 
-However, I guess **Unit testing** is the simplest and, at the same time, most complicated topic, and the one ultimately related to programming unlike other ones above. Instead of application of deployment you deal with actual functions in the code, and testing may cover either separate functions or entire pipelines - whatever you identify as a unit in your code. For example, if there are 3 functions passing data to each other, there can be 1 or 3 unit tests. If we are reading 3 different logs, then there should be 3 unit tests.
+However, I guess **Unit testing** is the simplest and, at the same time, most complicated topic, and the one ultimately related to programming unlike other ones above. Instead of application as a black box or deployment you deal with actual functions in the code, and testing may cover either separate functions or entire pipelines - whatever you identify as a unit in your code. For example, if there are 3 functions passing data to each other, there can be 1 or 3 unit tests. If we are reading 3 different logs, then there should be 3 unit tests.
 
 Unit testing is initiated during the project build. If something fails, the build job will fail, and the code will not be deployed. During the project build, there might be some semi-muted exceptions thrown.
 
 From here on, I will illustrate my thoughts on a simple ETL pipeline examples like log parsing, which is pretty common for industrial applications.
 
-Unit tests cover various problems with input and output data. How to parse invalid dates February 31st and missing commas or semicolons which make input erroneous.
+Unit tests cover various problems with input and output data. For example, how to parse invalid dates like February 31st and missing commas or semicolons which make input erroneous.
 
 A set of unit tests may include:
 
 -   Input data, including complete garbage
 -   Substituting various circumstances for a function that searches in a database or sends REST requests, etc. What if there are problems with authorization, etc.
 
-In real-life projects, **it's impossible to have unit tests for everything**. There isn't the capability to test absolutely everything. For instance, within the scope of unit testing, it's not possible to cover all of a project's interactions with a database, etc.
+In real-life projects, **it's impossible to have unit tests for everything**. There is no capability to test absolutely everything. For instance, within the scope of unit testing, it's not possible to cover all of project's interactions with a database, etc.
 
 For example, in the paper [CODAMOSA: Escaping Coverage Plateaus in Test Generation with Pre-trained Large Language Models](#ref1) authors introduce their solution which uses existing algorithmic software for test case discovery using, say, genetic algorithm, augmented with LLM to discover new possible test directions when automated software sees stall in coverage.
 
@@ -62,13 +62,13 @@ We can count that as a first example of LLM assistance in Unit testing, but such
 
 1. Can rely on it almost entirely for a well defined set of tasks (**automatic solution**)
 2. Can automatically spot problems with LLM discovering test cases and creating working unit test code, and involve human assistance in a way which reduces human workload compared to manual software engineering (**semi-automatic solution**)
-3. Can at least involve LLM as assistant (copilot-like, side information panel or dialogue agent) which again reduces human workload compared to manual software engineering (**coding assistant solution**).
+3. Can at least involve LLM as assistant (copilot-like, side information panel or a dialogue agent) which again reduces human workload compared to manual software engineering (**coding assistant solution**).
 
 This topic is also touched in [R. Feldt, S. Kang, J. Yoon, and S. Yoo. Towards autonomous testing agents via conversational large language models](#ref2), and I will elaborate it more in the next paragraphs after my experiment with GPT4.
 
 
 ## Few examples from Code-LLM evolution <a name="paragraph1"></a>
-Though LLM architecture and training process are definitely very important, at the moment I don't see the immediate benefit from exploration of LLM architectures and training losses. All of LLMs are not perfect at the moment in code generation, with GPT-4 reaching 94.4% precision for the first pass (no corrections) for the solution of algorithmic problems on [HumanEval benchmark](https://paperswithcode.com/sota/code-generation-on-humaneval) which consists of 164 coding problems with textual formulations. Therefore, I choose GPT-4 to test the unit test generation workflow as described in the articles and papers, and will present my results in the next section.
+Though LLM architecture and training process are definitely very important, at the moment I don't see the immediate benefit from exploration of LLM architectures and training losses. All of LLMs are not perfect at the moment in code generation, with GPT-4 reaching 94.4% precision for the first pass (no corrections) on [HumanEval benchmark](https://paperswithcode.com/sota/code-generation-on-humaneval)(solution of algorithmic problems described in Natural Language), which consists of 164 coding problems with textual formulations. Therefore, I choose GPT-4 to test the unit test generation workflow as described in the articles and papers, and will present my results in the next section.
 
 The LLM evolution tree is provided in [Large Language Models for Software Engineering: A Systematic Literature Review](#ref3) on page 10.
 **![](https://lh7-us.googleusercontent.com/pncsLidpzPkfye-LBnZ9s-ZOias_sDvTIjACAkYRjjDDeEHRo12nH-3S8s4Zb1xJQ3tHNGG-kbs3YjR55wpqKYE33-wiXUVyYbHVRLI1xpZS_FVRugmLZJhN29zYABvbKMW9zaZgulZ12hVTWEcFH50)**
@@ -133,11 +133,11 @@ The benefits of the approach are:
 -   *Different models for different steps (e.g.,  `gpt-3.5-turbo-instruct`  for the text planning steps and  `gpt-4`  for the code writing step)* (**My note**: common practice for many tasks like classification is even training simple classifier or other ML model using a lot of synthetic examples from LLM and running LLM only if confidence of ML method is low).
 -   *A check that re-runs the function if the output is unsatisfactory (e.g., if the output code cannot be parsed by Python's  `ast`  module)*
 
-In my opinion, asking LLM to create summary and describe the function helps later for RAG-like mechanisms to retrieve condense information from conversations history (or summaries can be directly included into each prompt).
+In my opinion, asking LLM to create summary and describe the function helps later for RAG-like mechanisms to retrieve condensed information from conversation history (or summaries can be directly included into each prompt), also it doubles the representation of infirmation (code + text) with different level of abstraction.
 
 For testing, I took the simple ETL code written by my friend, which processes logs: https://github.com/ashd97/cucm-zoom-directions-fixer
 
-The main function, [`parse_cdr_log`](https://github.com/ashd97/cucm-zoom-directions-fixer/blob/76da6c18203de8d1a6e1c5e521da707130c37a13/directions-fixer.py#L164), is being called in multiprocessing manner to extract records from logs which contain phone numbers from dir_of_active_phones. There core mechanism of the function is [a construction of many IFs](https://github.com/ashd97/cucm-zoom-directions-fixer/blob/76da6c18203de8d1a6e1c5e521da707130c37a13/directions-fixer.py#L210):
+The main function, [`parse_cdr_log`](https://github.com/ashd97/cucm-zoom-directions-fixer/blob/76da6c18203de8d1a6e1c5e521da707130c37a13/directions-fixer.py#L164), is being called in multiprocessing manner to extract records from logs which contain phone numbers from `dir_of_active_phones`. There core mechanism of the function is [a construction of many IFs](https://github.com/ashd97/cucm-zoom-directions-fixer/blob/76da6c18203de8d1a6e1c5e521da707130c37a13/directions-fixer.py#L210):
 ```
  for phone_recorder_tuple in dir_of_active_phones:
      if (fields[8] in phone_recorder_tuple or fields[30] in phone_recorder_tuple):
@@ -310,14 +310,14 @@ In this example, the network is:
 1. Very good at summarization and general description of what function is doing
 2. Describes possible test cases, sometimes acting as "captain obvious"
 3. Refuses to do detailed "rubber duck" tracing of the program code
-4. Generates visually good looking code using `unittest` library, but makes non-obvious and hard to debug mistakes related to mocking Python `open` function.
-5. The logic with a number of IFs from the example above and positional checks for arguments like `if (fields[8] in phone_recorder_tuple or fields[30] in phone_recorder_tuple)` are too hard  for the network to generate the right mock data even with direct guidelines. **In this case, debugging GPT generated code takes the time comparable with writing such tests manually**.
+4. Generates visually good looking code using `unittest` library, but makes non-obvious and hard to debug mistakes related to mocking Python `open` function
+5. The logic with a number of IFs from the example above and positional checks for arguments like `if (fields[8] in phone_recorder_tuple or fields[30] in phone_recorder_tuple)` are too hard  for the network to understand and generate the right mock data even with direct guidelines. **In this case, debugging GPT generated code takes time comparable with writing such test manually**. However, it may probably succeed with writing additional test cases for the existing test function, and I will mention that later.
 
 In the next paragraph, I make a survey on papers and current approaches to the unit tests generation problem.
 
 ## Current view on the problem from papers <a name="paragraph3"></a>
 
-here I want to cite a few of recent papers, creating an overview of the proposed approaches and reach conclusion based on this information and my research with GPT.
+Here I want to cite a few of recent papers, creating an overview of the proposed approaches and reach conclusion based on this information and my research with GPT.
 
 At first, in my opinion, beside the actual code generation, the task of LLM-based unit testing is closely related to
 
@@ -326,8 +326,9 @@ At first, in my opinion, beside the actual code generation, the task of LLM-base
 
 Which are organically included into the testing problem.
 
-Also, the paper [The Program Testing Ability of Large Language Models for Code](#ref8) provides some metrics which can be used, but the most important point as for me is a problem definition from peer reviewer:
+The paper [The Program Testing Ability of Large Language Models for Code](#ref8) provides some metrics which can be used, but the most important point as for me is a problem definition given by peer reviewer. I provide the entire summary here though I will explore practical solutions below:
 
+<a name="oracle"></a>
 > A piece of code designed to solve a certain problem may have some implementation errors. Given such code, we would like to:
 > -   generate inputs that cover most of the paths in the program (high coverage)
 > -   find the “true” outputs for these inputs that test the  _intended_  functionality of the code. Note that this is not the same as simply
@@ -351,7 +352,7 @@ Also, the paper [The Program Testing Ability of Large Language Models for Code](
 
 
 
-I would like to start my overview with the paper [R. Feldt, S. Kang, J. Yoon, and S. Yoo. Towards autonomous testing agents via conversational large language models, 2023](#ref2) which provides important classification which is related to the [Goals](#goals) I identified earlier and does some experiments similar to mine. I would allow myself extensive quotes from the papers.
+I would like to start my review of practical solutions with the paper [R. Feldt, S. Kang, J. Yoon, and S. Yoo. Towards autonomous testing agents via conversational large language models, 2023](#ref2) which provides important classification which is related to the [Goals](#goals) I identified earlier and does some experiments similar to mine. I would allow myself extensive quotes from the papers.
 
 *This paper provides an overview of conversational and potentially autonomous testing agents by first presenting a taxonomy of such agents, describing how these agents could help developers (and increasingly so when granted with greater autonomy). A concrete example of a conversation with an LLM is provided as initial confirmation that conversational testing can be used to enhance the testing effectiveness of developers. Finally, limitations of these techniques is provided, providing context for our vision*.
 
@@ -369,11 +370,11 @@ Their opinion is that LLMs are currently more capable to act in step-by-step man
 
 Therefore, they propose the taxonomy on the picture above. The taxonomy in Table I classifies the use of Large Language Models (LLMs) in software testing by their level of autonomy. It ranges from low autonomy, where LLMs like GitHub Copilot respond to front-end triggers, to higher autonomy in conversational testing, where LLMs interact with users to drive testing processes. At the highest autonomy level, LLMs independently execute complete testing tasks, guided only by high-level human instructions. This requires implementing middleware to integrate various testing tools and techniques for effective LLM use.
 
-It looks like the lowest levels of autonomy act as a tutorial, provide detailed descriptions, describe possible cases and help junior engineer who is basically going through code. LLM suggestions need constant supervision and corrections after implementation. Writing test here can be quite close to rubber duck tracing with LLM infilling the the short pieces of code. Therefore, the task should be possible to decompose into such chunks.
+To me, lower levels of autonomy act as a tutorial, provide detailed descriptions, describe possible cases and help junior engineer who is basically going through code with basic copilot-like infilling. LLM suggestions need constant supervision and corrections after implementation. Writing tests under those circumstances can be quite close to rubber duck tracing with LLM infilling the short pieces of code. Therefore, the task should belong to the ones which are decomposable into such small chunks.
 
-In their paper, they perform a test with a toy function, and quickly run into LLM hallucination and "*We were not impressed by the fact that the model were now confidently explaining that the clamp function behaves in this way when it had earlier proposed this was not the case. However, the conversational mode of interaction was useful in nudging the model to give us more detailed and concrete information and in particular to provide relevant test code to exemplify its recommendations*".
+In their paper, they perform a test with a toy function, and quickly run into LLM hallucination: "*We were not impressed by the fact that the model were now confidently explaining that the clamp function behaves in this way when it had earlier proposed this was not the case. However, the conversational mode of interaction was useful in nudging the model to give us more detailed and concrete information and in particular to provide relevant test code to exemplify its recommendations*".
 
-In my opinion, **this conversational manner with the need to actually supervise the model creates a workload on the engineer**, though may be useful providing explanations how the code works. The middleware output (e.g. traceback) should be sent into the model together with code and objectives approved by engineer. **It can be probably implemented as a side panel which provides live explanations regarding the line of code where cursor sits, and providing immediate infilling in copilot-like manner.**. In addition, I want to mention that LLM context window is too small for efficient understanding of the code, so **probably the actual working code needs specific preprocessing which will split it into blocks, replacing them with just their interfaces and explanations for LLM**, so it can focus on the actual block being tested.
+In my opinion, **this conversational manner with the need to actually supervise the model creates a workload on the engineer**, though may be useful providing explanations how the code works. The middleware output (e.g. traceback) should be sent into the model together with code and objectives approved by engineer. **It can be probably implemented as a side panel which provides live explanations regarding the line of code where cursor sits, and providing immediate infilling in copilot-like manner.** In addition, I want to mention that LLM context window is too small for efficient understanding of the code, so **probably the actual working code needs specific preprocessing which will split it into blocks, replacing them with just their interfaces and explanations for LLM**, so it can focus on the actual block being tested.
 
 The proposition from the paper is similar:
 
@@ -381,14 +382,17 @@ The proposition from the paper is similar:
 
 
 
-The next two papers I want to bring here  extend the above idea to me in a way that **LLM result improvement based on middleware feedback can be iterative, and can be packed into some sort of semi-automated solution which either returns working test or cuts the process after N iterations and passes the task to human**.
+The next two papers I want to bring here  extend the above idea to me in a way that **LLM can generate many candidate examples, result improvement based on middleware feedback can be iterative, and can be packed into some sort of semi-automated solution which either returns working test or cuts the process after N iterations and passes the task to human**.
 
 The first one is basically LLM Bug reproduction pipeline based on reports: [Large Language Models are Few-shot Testers: Exploring LLM-based General Bug Reproduction (LIBRO)](#ref4).
 
 The system in their example starts from existing bug report, but it can be a GPT suggestion of suitable test cases as well.
 
 ![](https://lh7-us.googleusercontent.com/O8bhHJE134X3tvU72EKKSMj2o2jXHxBW1dnu-BVsftPktPYUgQjGkB8ixC0ZYANiuVQ4JJkX17tB6dFAeFhjU_i11TowdGZ2IvQPNnl1hWIMEnBhME-b1RM5HgWZj5iDTPssNmacKX2OTnWf-k-wDa4)
-*An overview diagram of our approach is presented in Figure 1. Given a bug report, LIBRO first constructs a prompt to query an LLM (Figure 1:(A)). Using this prompt, an initial set of test candidates are generated by querying the LLM multiple times (Figure 1:(B)). Then, LIBRO processes the tests to make them executable in the target program (Figure 1:(C)). LIBRO subsequently identifies and curates tests that are likely to be bug reproducing, and if so, ranks them to minimize developer inspection effort (Figure 1:(D)). The rest of this section explains each stage in more detail*
+
+*An overview diagram of our approach is presented in Figure 1. Given a bug report, LIBRO first constructs a prompt to query an LLM (Figure 1:(A)). Using this prompt, an initial set of test candidates are generated by querying the LLM multiple times (Figure 1:(B)). Then, LIBRO processes the tests to make them executable in the target program (Figure 1:(C)). LIBRO subsequently identifies and curates tests that are likely to be bug reproducing, and if so, ranks them to minimize developer inspection effort (Figure 1:(D)).*
+
+Authors take the approach of generating multiple candidate reproducing tests with temperature 0.7, then using their characteristics to identify how likely it is that the bug is actually reproduced.
 
 The second paper is [*Teaching Large Language Models to Self-Debug*](#ref5):
 
@@ -409,33 +413,31 @@ The table from the Self-debug paper showing iteration of text2SQL task:
 
 Next paper which exploits the approach of code+feedback is [Self-Edit: Fault-Aware Code Editor for Code Generation](#ref6). The idea here is the same, their "Neural code editor" loops back to LLM with execution traceback.
 
-Last paper to mention here is [Self-planning Code Generation with Large Language Models](#ref9). Their solution first generates a "Plan" (high-level algorithm) from initial Natural Language formulated task, and then uses the concatenation plan+initial intent to generate next iteration which they call Chain of Thought (CoT), few-shot prompting technique which enables LLMs to perform step-by-step reasoning. Every step in plan represents a single, easily implementable subtask. These sub-tasks are formulated as imperative sentences that start with verbs, focusing on the action needed in each step, because LLM cannot understand that the intent is a combination of multiple problems in direct code generation. The image from the paper illustrates their approach:
+Last paper from this group is [Self-planning Code Generation with Large Language Models](#ref9). Their solution first generates a "Plan" (high-level algorithm) from initial Natural Language formulated task, and then uses the concatenation plan+initial intent to generate next iteration which they call Chain of Thought (CoT), few-shot prompting technique which enables LLMs to perform step-by-step reasoning. Every step in plan represents a single, easily implementable subtask. These sub-tasks are formulated as imperative sentences that start with verbs, focusing on the action needed in each step, because LLM cannot understand that the intent is a combination of multiple problems in direct code generation. The image from the paper illustrates their approach:
 
 ![](https://lh7-us.googleusercontent.com/Z6TqXJjZGNMzkKVhbyyvlw35Tm0h3TrFh0NrTgBmRbId8Cb2qr9GSTK-vwPm9Po_pCaUkhltr0f0hjFa86Waruedk_p5ETm6DxzIKxOKB41rOPBbs7QZgmyh66K0icnHHe6hjl54IMdV66SBFEfrAuc)
 
-**We still operate with pass rate like 30-40-60-etc % on HumanEval and similar datasets. So our product should somehow mitigate the 30-70% of garbage generated by LLM**.
+From those papers I have an impression of what seems to me as a mainstream approach with middleware feedback together with performing code generation in stages which involve task decomposition, writing plans, etc. Worth to note, that we operate with pass rate like 30-40-60- % on HumanEval and similar datasets. So our product should somehow mitigate the 30-70% of garbage generated by LLM.
 
-**Middleware feedback approach together performing code generation in stages which involve task decomposition, writing plans, etc, seems quite mainstream to me at the moment with the papers I checked proposing variants of those ideas. **
+**The iterative approach can probably elevate us in the hierarchy of the test taxonomy, at least creating some of the working tests automatically. All the cases where automatically and iteratively generated test fails compilation or evaluation for N interations, can be discarded or checked by human. It may contain just wrong understanding from LLM and consume human time on checks. Quick solution might consist of evaluation of the results with other LLMs (well-know "experts" approach), thus reducing the amount of accepted tests even more, but probably unloading human from some of the erroneous cases.**
 
-**The iterative approach can probably elevate us in the hierarchy of the test taxonomy, at least making some working tests automatically.  All the cases where automatically and iteratively generated test fails compilation or evaluation can be of interest to human. But it may contain just wrong understanding from LLM and consume human time on checks. Quick solution might consist of evaluation of the results with other LLMs (well-know "experts" approach), thus reducing the amount of accepted tests even more, but probably unloading human from some of the erroneous cases.**
-
-But in general, debugging capabilities of LLMs are low, as concluded in the paper [DebugBench: Evaluating Debugging Capability of Large Language Models](#ref7):
+In general, debugging capabilities of LLMs are low, as concluded in the paper [DebugBench: Evaluating Debugging Capability of Large Language Models](#ref7):
 
 > LLM debugging falls short of human performance. Open-source models attain a pass rate of 0 %, struggling to produce meaningful debugging responses. Closed-source LLMs significantly surpass open-source ones but still fall short of human-level performance; (2) The difficulty of fixing different types of errors differs. Multiple errors and logical errors are significantly more challenging to repair than syntax and reference errors; (3) Runtime feedback has a clear impact on LLM’s debugging performance but is not always helpful. While runtime feedback consistently boosts the debugging performance of syntax and reference bugs, the feedback information is unhelpful for logic errors.
 
-Nevertheless, this paper provided an interesting pipeline bug implantation using GPT-4 which in my opinion can be used for training models using RL objective:
+Nevertheless, this paper provided an interesting pipeline for bug implantation using GPT-4 which in my opinion can be used for training models using RL objective:
 
 > We first collect code snippets from LeetCode (2023) community, then employ GPT-4 (OpenAI, 2023) for bug implantation and finally conduct human / LLM evaluation on the benchmark.
 
 The next paper I want to propose, guides to some additional practical way to use LLM test generation for industry, particularly addressing coverage problem: [CODAMOSA: Escaping Coverage Plateaus in Test Generation with Pre-trained Large Language Models](#ref1)
 
-Microsoft authors propose using LLMs as addition to algorithmic software which to assist it in discovering more cases for testing. **I think LLM can synthesize synthetic examples well tailored to the code purpose which can be starting point of algorithmic approach.**
+Microsoft authors propose using LLMs as addition to algorithmic software to assist it in discovering more cases for testing. **I like the idea when LLM is introduced not to the entire big task, but for some subtask where it may reach bigger precision working with smaller code modules, which I expect are the parts of algorithmic approach.** For example, I think LLM can synthesize synthetic examples well tailored to the code purpose which can be starting point of algorithmic approach.
 
-Another idea which came into my mind while reading this, is addressing high code repeating in tests: **LLMs can be targeted not to produce new tests, but augment existing ones and reuse the code of the closest unit test function.** Perhaps it was written in some paper, but I forgot the reference.
+Another idea which came into my mind while reading this, is addressing high code repetition in tests: **LLMs can be targeted not to produce new tests, but augment existing ones and reuse the code of the closest unit test function.**
 
-**This direction can probably mitigate the problem of low quality code generation from LLMs: Use LLMs for augmentation of tests, test case generation to enhance algorithmic solutions, refining LLM suggestions via iteartive loop which involves rubber duck tracing and execution traceback, cutting the procedure after N iterations. In the absence of tests, the initial tests can be generated from the actual data for which the result is known.**
+**This direction can probably help mitigate the problem of low quality code generation from LLMs at the moment: Use LLMs for augmentation of tests, test case generation to enhance algorithmic solutions.**
 
-Previous papers used pretrained LLMs. Of course, the iterative feedback approach rises natural question about using reinforcement learning to interact dynamically with environment. Those approaches exist of course, I propose to take a look at the paper
+Previous papers used pretrained LLMs. Of course, the iterative feedback approach rises natural question about fine tuning, e.g. using reinforcement learning to interact dynamically with environment. Those approaches exist of course, I propose to take a look at the paper
 [RLTF: Reinforcement Learning from Unit Test Feedback](#ref10).
 
 The mainstream approach of decomposition of the problem and addressing smaller units is used in this paper. They state:
@@ -452,69 +454,70 @@ Though they use external labels which allow them to run unit tests and use super
 
 ### Conclusion
 
-I took the task of Unit testing as research objective. Other testing problems communicate with more complicated software (e.g. docker image or services as black boxes) and can rather be developed as extension of unit tests which in their minimal form can address small units of the source code (the limitation can be set manually).
+I took the task of Unit testing as research objective. Other testing problems communicate with more complicated software (e.g. docker image or services as black boxes) and can rather be developed as further extension of unit tests which in their minimal form can address small units of the source code (the restrictions can be tuned manually).
 
-To create a valuable commercial product, we need to create a solution which somehow mitigates reduces the workload of software engineer. Possible solutions elevate from different assistance tasks which might help human engineer to write and debug the code, to fully automatic solutions which may produce some tests with low degree of supervision. We need to choose the most practical level for us where we can create value.
+To create a valuable commercial product, we need to create a solution which reduces the workload of software engineer. Possible solutions elevate from different assistance tasks which might help human engineer to write and debug the code, to fully automatic solutions which may produce some tests with low degree of supervision. We need to choose the most practical level for us where we can create value.
 
-The general result is that LLMs are good at summarization and textual description of the input data, but code generation made and especially debugging made by LLMs is still very bad. Probable reason of it is that code generation is a complex and multi-objective task, so the mainstream approaches at the moment introduce the following actions to mitigate it:
+The general result is that LLMs are good at summarization and textual description of the input data, but code generation and especially debugging made by LLMs is still very bad. Probable reason of it is that code generation is a complex and multi-objective task, so the mainstream approaches at the moment introduce the following actions to mitigate it:
 
-1. Splitting larger problem into detailed plans with as much as possible separation of actions.  Those plans are concatenated with initial prompt to enhance the task description for LLM.
-2. Force LLM understanding of the input and output code by again providing detailed algorithmic explanations and rubber duck tracing with possible involvement of algorithmic middleware. In my opinion, those pieces of textual data are better understood by LLM and better retrieved from the knowledge base / conversation history.
-3. Perform iterative generation with the usage of middleware (execution traceback and external unit tests) with some limited number of attempts. Many papers operate with benchmarks where scores for attempts 1, 5 and 10 are given.
+1. Splitting larger problem into detailed plans/pseudocode with as much as possible separation of actions. Those plans are concatenated with initial prompt to enhance the task description for LLM.
+2. Force LLM understanding of the input and output code by again providing detailed algorithmic explanations and rubber duck tracing with possible involvement of algorithmic middleware. Seems like those pieces of textual data are better understood by LLM and better retrieved from the knowledge base / conversation history.
+3. Perform iterative generation with evaluation of multiple variants and usage of middleware (execution traceback and external unit tests) with some limited number of attempts. Many papers operate with benchmarks where scores for attempts 1, 5 and 10 are given.
 
-I also think that middleware output can be not only a single error message with line number, but a full log of execution traceback of the program taken from the very beginning with the values of all the variables logged. To be able to use this data given the small LLM context window, the textual explanation and summarization proposed above can be applied with the help of another LLM which is more capable in that. Even if current out of the box models may be not trained for this specific task, a lot of information coming from the debugging process can be used for supervised and online RL fine tuning.
+My hypothesis is that pretrained LLMs are usually fine-tuned for simple code generation tasks using simple token prediction and infilling objectives, so they are not adapted to the complex multi-stage task proposed (bug detection, debugging, oracle, etc), therefore complicated pipelines are constructed to take some of the logic out of LLM into the algorithm to ease the task for generative model.
 
-Reinforcement learning can be introduced to the iterative process, in theory allowing us to improve the results, especially if some ground truth data is present for more stable training (bug reports, valid use cases).
+I also think that middleware output can be not only a single error message with line number, but a full log of execution traceback of the program taken from the very beginning with the values of all the variables logged. To be able to use this data given the small LLM context window, the textual explanation and summarization proposed above can be applied with the help of another LLM which is more capable in that. Even if current out-of-the-box models may be not trained for this specific task, a lot of information coming from the debugging process can be used for supervised and online RL fine tuning.
+
+Reinforcement learning can be introduced to the iterative process, in theory allowing us to improve the results and tune LLM to the nature of the task and traceback data provided, especially if some ground truth data is present for more stable training (bug reports, valid use cases).
 
 Specific problem of testing involves LLM-based Bug Reproduction problem in case test reports are available which needs from LLM code understanding and debugging capabilites.
 
 The pipeline can be performed by multiple different models tailored to different tasks. For example, we can use specific models developed for short code generation and code embeddings like [MagicCoder](https://github.com/ise-uiuc/magicoder), and do task splitting into subtasks by powerful LLM like GPT. Also, more classical neural networks and ML models can be trained using a lot of synthetic data generated by LLM (e.g. classification task) with the ability to involve LLM only when classifier confidence is small.
 
-**My suggestions for commercial solution, we can tackle the test taxonomy in two or three places**.
+**My suggestions for commercial solution, for it we can tackle the test taxonomy in two or three places:**
 
 The main problem is to deal with low code and debugging quality of LLMs which create only 30-90% of working code for rather simple isolated problems like the ones from HumanEval dataset.
 
-1. The lowest level is **code assistance**. Summarizations and explanations of each program step are already useful and we can provide it as an assistance to the software engineer, filling small code blocks in copilot-like manner, keeping human supervision. Also we can display explanation of the current line of code and suggestions in the panel nearby. This may help us to collect a lot of fine-level supervised training data for those small code blocks which may help us to improve automatic solutions while helping engineer with understanding, debugging and repetitive code tasks which are abundant in testing.
-2. **Semi-automatic level**: accepting tests which are generated in the iterative LLM pipelines. It can be achieved by taking coarse data of bug reports, real enterprise data processed by the code every day, existing working unit tests, and feeding it into (possibly RL-enabled) iterative solutions. In this case, we can carefully accept the tests which work for real use-case data (even though some of them might be erroneous like `return True` ), and provide the code which failed N generation iterations for human observation of just filter it.
+1. The lowest level is **code assistance**. Summarizations and explanations of each program step are already useful and we can provide it as an assistance to the software engineer, filling small code blocks in copilot-like manner, keeping human supervision. Also we can display explanation of the current line of code and suggestions in the panel nearby. This may help us to collect a lot of fine-level supervised training data for those small code blocks which may help us to improve automatic solutions while helping engineer with understanding, debugging and repetitive code tasks which are abundant in testing. However, for our soultion to be useful, **it should not create workload on the engineer** like additional chatting with LLM and fixing its results. Everything should go inline and smoothly.
+2. **Semi-automatic level**: accepting tests which are generated in the iterative LLM pipelines. It can be achieved by taking coarse data of bug reports, existing working unit tests (in the absence of tests, the initial tests can be generated from the actual data for which the result is known), and feeding it into (possibly RL-enabled) iterative solutions. In this case, we can carefully accept the tests which work for real use-case data (even though some of them might be erroneous like `return True` ), and provide the code which failed N generation iterations for human observation of just discard it.
 3. We can **add LLMs to the existing automated solutions** in such way that novel test cases proposed by LLMs do not break the procedure, but augment its logic and increase coverage which can be evaluated.
 4. We can carefully apply LLM test generation involving **only small modification of existing test functions** and mock data. Or provide existing tests to the iterative generation pipeline.
 
 LLM can also help us with auxiliary tasks like:
 
-I. **Covering all the code in logging** - pretty simple, yet extensive task, which will in turn generate a lot of data which we can later feed into our test generation network.
-II. The same for **code commenting** which may save us time later by passing those comments together with code to LLM. By the way, the code is naturally represented as Graph (e.g. AST tree) and Graph Neural Networks coupled with existing transformers (e.g. in the role of encoder or decoder) seem like a natural solution, but I don't see much publications in the topic. For example, I found 2022 article [Code comment generation based on graph neural network enhanced transformer model for code understanding in open-source software ecosystems](https://dl.acm.org/doi/abs/10.1007/s10515-022-00341-1).
+I. **Covering all the code in logging** - pretty simple, yet extensive task, which will in turn generate a lot of log data which we can later feed into our test generation network.
+II. The same for **code commenting** which may save us time later by passing those comments together with code to LLM. By the way, the code is naturally represented as graph (e.g. AST tree) and Graph Neural Networks coupled with existing transformers (e.g. in the role of encoder or decoder) seem like a natural solution, but I don't see much publications in the topic. For example, I found 2022 article [Code comment generation based on graph neural network enhanced transformer model for code understanding in open-source software ecosystems](https://dl.acm.org/doi/abs/10.1007/s10515-022-00341-1).
 
-**I think, we can start simultaneously with 1) and 2)**, by collecting human feedback from copilot and informational solution, at the same time evaluating the quality and coverage of the working tests, coming from the iterative pipelines which more or less allow us to drop the worst garbage coming from LLMs by discarding it after N iterations.
+**I think, we can start simultaneously with 1) and 2)**, by collecting human feedback from copilot and informational solution, at the same time evaluating the quality and coverage of the succesfully generated tests, coming from the iterative pipelines which more or less allow us to drop the worst garbage coming from LLMs by discarding it after N iterations.
 
-While our solutions are weak, we can tailor them only to generate tests for the labeled cases (when bug report and/or real data exists), then slowly turning to exploration of code vulnerabilities.
+While our solutions are weak, we can tailor them only to generate tests for the labeled cases (when bug report and/or real data exists), then slowly turning to exploration of code vulnerabilities (oracle problem).
 
-Product 1) will also provide us with fine-level labeled data (proposed mini unit vs the one coded by software engineer) for improving both approaches.
+[**Oracle problem**](#oracle) (predicting what the right cases should be given wrong code) is definitely very hard, we can evaluate our chances after having good results from product 1) and possibly 2).
 
-When having the data, we can benefit from RL and fine tuning our ensemble of LLMs to work better with the types of data we provide (rubber duck tracebacks, excecution tracebacks, etc) instead of creating complicated pipelines for pretrained LLMs which were not designed for those specific tasks.
+Product 1) will also provide us with fine-level labeled data (proposed mini unit vs the one implemented by software engineer) for improving both approaches.
+
+When having the data, we can benefit from RL and fine tuning of our ensembles of LLMs to work better with the types of data we provide (rubber duck tracebacks, excecution tracebacks, etc) instead of creating complicated pipelines for pretrained LLMs which were not designed for those specific tasks.
 
 **During the development, I expect we need to seek the solutions to the following problems**:
 
-1. Reducing the complexity the the problem for LLM by splitting the code into the smallest units possible, as well as generation of plans and pseudocode to guide LLM generation, debugging, and bug discovery. Exploring graph-based code representations might turn to be beneficial.
+1. Reducing the complexity of the problem for LLM by splitting the code into the smallest units possible, as well as generation of plans and pseudocode to guide LLM generation, debugging, and bug discovery. Exploring graph-based code representations might turn to be beneficial.
 2. Develop better addressing of codebase (knowledge base). This might involve using code embeddings for RAG, code preprocessing like substitution of all irrelevant code blocks with their interfaces, extensive usage of summarizations and comments on different levels.
 3. Improve LLM+middleware debugging capabilites.
 
 
 ## References <a name="references"></a>
 
-1. [**CODAMOSA: Escaping Coverage Plateaus in Test Generation with Pre-trained Large Language Models:**](https://www.carolemieux.com/codamosa_icse23.pdf)
-<a name="ref1"></a>
-3. [**R. Feldt, S. Kang, J. Yoon, and S. Yoo. Towards autonomous testing agents via conversational large language models. CoRR, abs/2306.05152, 2023**](https://arxiv.org/pdf/2306.05152.pdf)** <a name="ref2"></a>
-4. [**Large Language Models for Software Engineering: A Systematic Literature Review**](https://arxiv.org/pdf/2308.10620.pdf)  <a name="ref3"></a>
-5. [**Large Language Models are Few-shot Testers: Exploring LLM-based General Bug Reproduction (LIBRO)**](https://arxiv.org/pdf/2209.11515.pdf), [Github](https://github.com/coinse/libro) <a name="ref4"></a>
-6. [Teaching Large Language Models to Self-Debug](https://arxiv.org/pdf/2304.05128.pdf) <a name="ref5"></a>
-7. [**Self-Edit: Fault-Aware Code Editor for Code Generation**](https://aclanthology.org/2023.acl-long.45v3.pdf)<a name="ref6"></a>
-8. [DebugBench: Evaluating Debugging Capability of Large Language Models](https://arxiv.org/abs/2401.04621)<a name="ref7"></a>
-9. [**The Program Testing Ability of Large Language Models for Code**](https://openreview.net/forum?id=PFdjJiZjPj)
-<a name="ref8"></a>
-10. [**Self-planning Code Generation with Large Language Models**](https://arxiv.org/pdf/2303.06689.pdf)
-<a name="ref9"></a>
-11. [**RLTF: Reinforcement Learning from Unit Test Feedback**](https://openreview.net/forum?id=hjYmsV6nXZ) [Code](https://github.com/Zyq-scut/RLTF)
-<a name="ref10"></a>
+1. <a name="ref1"></a>[**CODAMOSA: Escaping Coverage Plateaus in Test Generation with Pre-trained Large Language Models:**](https://www.carolemieux.com/codamosa_icse23.pdf)
+2. <a name="ref2"></a>[**R. Feldt, S. Kang, J. Yoon, and S. Yoo. Towards autonomous testing agents via conversational large language models. CoRR, abs/2306.05152, 2023**](https://arxiv.org/pdf/2306.05152.pdf)**
+3. <a name="ref3"></a>[**Large Language Models for Software Engineering: A Systematic Literature Review**](https://arxiv.org/pdf/2308.10620.pdf)
+4. <a name="ref4"></a>[**Large Language Models are Few-shot Testers: Exploring LLM-based General Bug Reproduction (LIBRO)**](https://arxiv.org/pdf/2209.11515.pdf), [Github](https://github.com/coinse/libro)
+5. <a name="ref5"></a>[Teaching Large Language Models to Self-Debug](https://arxiv.org/pdf/2304.05128.pdf)
+6. <a name="ref6"></a>[**Self-Edit: Fault-Aware Code Editor for Code Generation**](https://aclanthology.org/2023.acl-long.45v3.pdf)
+7. <a name="ref7"></a>[DebugBench: Evaluating Debugging Capability of Large Language Models](https://arxiv.org/abs/2401.04621)
+8. <a name="ref8"></a>[**The Program Testing Ability of Large Language Models for Code**](https://openreview.net/forum?id=PFdjJiZjPj)
+9. <a name="ref9"></a>[**Self-planning Code Generation with Large Language Models**](https://arxiv.org/pdf/2303.06689.pdf)
+10. <a name="ref10"></a>[**RLTF: Reinforcement Learning from Unit Test Feedback**](https://openreview.net/forum?id=hjYmsV6nXZ) [Code](https://github.com/Zyq-scut/RLTF)
+
 
 
 
