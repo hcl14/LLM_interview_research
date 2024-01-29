@@ -27,7 +27,9 @@ There are many different ways of software testing, I can propose taking [Atlassi
 6. Smoke testing
 7. ...
 
-**Integration test** can be described in the following way: For example, there is a job that builds a Docker image for deployment. For instance, a Python application - which pulls some libraries. After assembling the Docker image you run it and make a `curl` request. The essence of the test is to check whether the Docker was built correctly and whether the program is able to respond. For example, the image might pull a lot of components that need to work together, and the service might not respond because something didn't get pulled in.
+Integration test (autotest) - after assembly, the correctness of operation is checked, where, for example, openssl encrypts a string after assembly with a bunch of methods (Chromium is only half covered with autotests)
+
+**Integration test** (autotest) checks operability after assembly. If we're developing something like opessl, we want to check that it encrypts and decrypts a string with a bunch of methods. Another example - let there be a job that builds a Docker image for deployment. For instance, a Python application - which pulls some libraries. After assembling the Docker image you run it and make a `curl` request. The essence of the test is to check whether the Docker was built correctly and whether the program is able to respond. For example, the image might pull a lot of components that need to work together, and the service might not respond because something didn't get pulled in. It's known that Chromium is only half-covered with autotests.
 
 **Functional test** - Say, developers send their requests to various services of the project through Postman.
 
@@ -52,7 +54,7 @@ A set of unit tests may include:
 -   Input data, including complete garbage
 -   Substituting various circumstances for a function that searches in a database or sends REST requests, etc. What if there are problems with authorization, etc.
 
-In real-life projects, **it's impossible to have unit tests for everything**. There is no capability to test absolutely everything. For instance, within the scope of unit testing, it's not possible to cover all of project's interactions with a database, etc.
+**In theory unit tests must cover all data paths, but in real-life projects it's an unattainable ideal.** There is no capability to test absolutely everything. For instance, within the scope of unit testing, it's not possible to cover all of project's interactions with a database, etc.
 
 For example, in the paper [CODAMOSA: Escaping Coverage Plateaus in Test Generation with Pre-trained Large Language Models](#ref1) authors introduce their solution which uses existing algorithmic software for test case discovery using, say, genetic algorithm, augmented with LLM to discover new possible test directions when automated software sees stall in coverage.
 
